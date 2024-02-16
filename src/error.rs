@@ -4,7 +4,7 @@ use axum::{
 	Json,
 };
 use serde::{Deserialize, Serialize};
-use tracing::error_span;
+use tracing::{error, error_span};
 use utoipa::ToSchema;
 
 /// A type alias for `Result<T, HandlerError>`.
@@ -84,9 +84,9 @@ where
 			let log_id = log_id.unwrap();
 
 			if self.status_code.is_server_error() {
-				error_span!("http_request", log_id = %log_id, server_error = %error);
+				error!(log_id = %log_id, server_error = %error, "An server error occurred");
 			} else {
-				error_span!("http_request", log_id = %log_id, error = %header, message = %message);
+				error!(log_id = %log_id, error = %header, message = %message, "An client error occurred");
 			}
 		}
 
@@ -107,7 +107,7 @@ where
 		Self {
 			status_code: StatusCode::INTERNAL_SERVER_ERROR,
 			header: String::from("Something went wrong"),
-			message: String::from("If this issue persists, please contact the administrator."),
+			message: String::from("If this issue persists, please contact an administrator."),
 			detail: None,
 			inner: Some(value.into()),
 			log_id: None, // This will be set in `into_response` if inner set.
