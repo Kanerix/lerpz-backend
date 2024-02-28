@@ -25,9 +25,8 @@ impl AuthTokenValidator {
 	}
 
 	/// Adds a single algorithm to the validation.
-	pub fn with_alg(mut self, algs: jsonwebtoken::Algorithm) -> Self {
-		self.validation.algorithms = Vec::with_capacity(1);
-		self.validation.algorithms.push(algs);
+	pub fn with_alg(mut self, alg: jsonwebtoken::Algorithm) -> Self {
+		self.validation.algorithms = vec![alg];
 		self
 	}
 
