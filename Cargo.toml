@@ -25,3 +25,6 @@ serde_json = "1.0"
 anyhow = "1.0"
 thiserror = "1.0"
 sqlx = { version = "0.7.3", features = ["postgres", "runtime-tokio-native-tls", "chrono", "migrate", "macros", "uuid"] }
+rand = "0.8.5"
+jsonwebtoken = "9.2.0"
+chrono = { version = "0.4.34", features = ["serde"] }

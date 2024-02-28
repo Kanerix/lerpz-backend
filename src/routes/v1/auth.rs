@@ -44,6 +44,7 @@ pub async fn login(
 	State(conn): State<PgPool>,
 	Json(body): Json<LoginRequest>,
 ) -> HandlerResult<Json<LoginResponse>, LoginErrorKind> {
+	"abs".parse::<i32>()?;
 	Ok(Json(LoginResponse {
 		kind: String::from("Bearer"),
 		token: String::from("token"),

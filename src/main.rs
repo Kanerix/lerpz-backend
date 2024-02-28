@@ -6,19 +6,26 @@ use std::{net::Ipv4Addr, time::Duration};
 use axum::{
 	extract::MatchedPath,
 	http::{Method, Request},
+	middleware::from_extractor,
 	Router,
 };
+use config::web_config;
+use middleware::auth::AuthUser;
 use sqlx::postgres::PgPoolOptions;
-use tower_http::{cors::CorsLayer, trace::TraceLayer};
-use tracing::{error_span, info_span};
+use tower::ServiceBuilder;
+use tower_http::{classify::ServerErrorsFailureClass, cors::CorsLayer, trace::TraceLayer};
+use tracing::{error_span, info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-mod auth;
+mod config;
 mod db;
 mod error;
+mod middleware;
+mod models;
 mod routes;
+mod utils;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -33,7 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let pool = PgPoolOptions::new()
 		.max_connections(5)
 		.acquire_timeout(Duration::from_secs(3))
-		.connect("postgres://root:password@localhost:5432/PrimaryDB")
+		.connect(&web_config().DATABASE_URL)
 		.await
 		.expect("can't connect to database");
 
@@ -44,12 +51,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		)
 		.nest("/api/v1", routes::v1::routes())
 		.with_state(pool)
-		.layer(CorsLayer::new().allow_methods(vec![
-			Method::GET,
-			Method::POST,
-			Method::DELETE,
-			Method::PUT,
-		]))
+		.layer(
+			CorsLayer::new()
+				.allow_origin(web_config().API_ORIGIN.clone())
+				.allow_methods(vec![Method::GET, Method::POST, Method::DELETE, Method::PUT]),
+		)
 		.layer(
 			TraceLayer::new_for_http().make_span_with(|request: &Request<_>| {
 				let matched_path = request
@@ -63,7 +69,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 					matched_path,
 				)
 			}),
-		);
+		)
+		.layer(ServiceBuilder::new().layer(from_extractor::<AuthUser>()));
 
 	axum::serve(listener, app.into_make_service())
 		.with_graceful_shutdown(shutdown_signal())
