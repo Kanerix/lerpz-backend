@@ -44,6 +44,24 @@ pub enum JwtIssuer {
 	API,
 }
 
+impl Display for JwtAudience {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		match self {
+			Self::MainWebsite => write!(f, "https://lerpz.com"),
+			Self::Account => write!(f, "https://account.lerpz.com"),
+			Self::Dashboard => write!(f, "https://dashboard.lerpz.com"),
+		}
+	}
+}
+
+impl Display for JwtIssuer {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		match self {
+			Self::API => write!(f, "https://api.lerpz.com"),
+		}
+	}
+}
+
 impl TokenClaims {
 	pub fn new(user: impl Into<TokenUser>) -> Self {
 		Self {
@@ -79,24 +97,6 @@ impl From<TokenUser> for TokenClaims {
 			iss: HashSet::new(),
 			aud: HashSet::new(),
 			user,
-		}
-	}
-}
-
-impl Display for JwtAudience {
-	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-		match self {
-			Self::MainWebsite => write!(f, "https://lerpz.com"),
-			Self::Account => write!(f, "https://account.lerpz.com"),
-			Self::Dashboard => write!(f, "https://dashboard.lerpz.com"),
-		}
-	}
-}
-
-impl Display for JwtIssuer {
-	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-		match self {
-			Self::API => write!(f, "https://api.lerpz.com"),
 		}
 	}
 }
