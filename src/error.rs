@@ -68,10 +68,8 @@ where
 	/// sets the log_id field so that the error can be tracked.
 	fn into_response(mut self) -> Response {
 		if let Some(error) = self.inner.as_ref() {
-			self.log_id = if let None = self.log_id {
-				Some(uuid::Uuid::new_v4())
-			} else {
-				self.log_id
+			if let None = self.log_id {
+				self.log_id = Some(uuid::Uuid::new_v4())
 			};
 
 			let HandlerError {
@@ -80,13 +78,13 @@ where
 				ref log_id,
 				..
 			} = self;
-			// The `log_id` is guaranteed set above.
+			// The `log_id` is guaranteed to be set (above).
 			let log_id = log_id.unwrap();
 
 			if self.status_code.is_server_error() {
 				error!(log_id = %log_id, server_error = %error, "An server error occurred");
 			} else {
-				error!(log_id = %log_id, error = %header, message = %message, "An client error occurred");
+				error!(log_id = %log_id, client_error = %header, message = %message, "An client error occurred");
 			}
 		}
 
