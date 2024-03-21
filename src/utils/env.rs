@@ -32,6 +32,6 @@ where
 	K: AsRef<OsStr>,
 	T: FromStr,
 {
-	let variable = std::env::var(key).map_err(|_| Error::NotFound)?;
+	let variable = get_env(key)?;
 	variable.parse().map_err(|_| Error::ParseError)
 }
