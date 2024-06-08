@@ -13,7 +13,7 @@ pub fn web_config() -> &'static Config {
 	static ENVIRONMENT: OnceLock<Config> = OnceLock::new();
 
 	ENVIRONMENT.get_or_init(|| {
-		Config::from_env().unwrap_or_else(|err| panic!("Couldn't load environment: {}", err))
+		Config::from_env().unwrap_or_else(|err| panic!("couldn't load environment: {}", err))
 	})
 }
 
