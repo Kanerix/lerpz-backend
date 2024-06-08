@@ -1,6 +1,3 @@
-#![allow(unused)]
-#![allow(dead_code)]
-
 use std::{net::Ipv4Addr, time::Duration};
 
 use axum::{
@@ -43,6 +40,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.connect(&web_config().DATABASE_URL)
 		.await
 		.expect("can't connect to database");
+
+	sqlx::migrate!();
 
 	let app = Router::new()
 		.merge(
