@@ -1,9 +1,12 @@
-use axum::{extract::State, routing::post, Json, Router};
+use axum::{extract::State, http::StatusCode, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use utoipa::{IntoParams, ToSchema};
 
-use crate::error::{HandlerError, HandlerResult};
+use crate::{
+	error::{HandlerError, HandlerResult},
+	models::user::User,
+};
 
 pub fn routes() -> Router<PgPool> {
 	Router::new().route("/login", post(login))
@@ -37,7 +40,6 @@ pub enum LoginErrorKind {
     ),
     responses(
         (status = 200, description = "Successful login", body = LoginResponse),
-        (status = 415, description = "Unsopported meadia type", body = String),
     ),
 )]
 pub async fn login(
@@ -74,12 +76,50 @@ pub enum RegisterErrorKind {
     ),
     responses(
         (status = 200, description = "Successful register", body = String),
-        (status = 415, description = "Unsopported meadia type", body = String),
     ),
 )]
 pub async fn register(
-	State(conn): State<PgPool>,
-	Json(body): Json<RegisterRequest>,
+	State(pool): State<PgPool>,
+	Json(payload): Json<RegisterRequest>,
 ) -> HandlerResult<String, RegisterErrorKind> {
-	Ok(String::from("Register successful"))
+	let password_hash = payload.password;
+
+	let user = match sqlx::query!(
+		"INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3)",
+		&payload.email,
+		&payload.username,
+		&password_hash
+	)
+	.execute(&pool)
+	.await
+	{
+		Err(err) => {
+			return match err {
+				sqlx::Error::Database(db_err) => {
+					return match db_err.kind() {
+						sqlx::error::ErrorKind::UniqueViolation => Err(HandlerError::new(
+							StatusCode::BAD_REQUEST,
+							"Unique violation",
+							"Email or Username already exsits",
+						)),
+						sqlx::error::ErrorKind::ForeignKeyViolation => Err(HandlerError::new(
+							StatusCode::INTERNAL_SERVER_ERROR,
+							"Foreign key violation",
+							"Something wen't wrong",
+						)),
+						sqlx::error::ErrorKind::CheckViolation => Err(HandlerError::new(
+							StatusCode::INTERNAL_SERVER_ERROR,
+							"Check violation",
+							"Something wen't wrong",
+						)),
+						_ => Err(HandlerError::from(db_err)),
+					}
+				}
+				_ => Err(HandlerError::from(err)),
+			}
+		}
+		Ok(user) => user,
+	};
+
+	Ok("8skv8".to_owned())
 }
