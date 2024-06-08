@@ -1,10 +1,8 @@
 use std::{
-	ffi::{OsStr, OsString},
-	fmt::Display,
+	ffi::OsStr,
 	str::FromStr,
 };
 
-use serde_json::error;
 
 /// A type alias for handling results from this module.
 pub type Result<T> = std::result::Result<T, Error>;

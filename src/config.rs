@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, sync::OnceLock};
+use std::sync::OnceLock;
 
 use axum::http::HeaderValue;
 

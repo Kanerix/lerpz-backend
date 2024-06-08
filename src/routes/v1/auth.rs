@@ -3,10 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use utoipa::{IntoParams, ToSchema};
 
-use crate::{
-	error::{HandlerError, HandlerResult},
-	models::user::User,
-};
+use crate::error::{HandlerError, HandlerResult};
 
 pub fn routes() -> Router<PgPool> {
 	Router::new().route("/login", post(login))

@@ -4,7 +4,7 @@ use axum::{
 	Json,
 };
 use serde::{Deserialize, Serialize};
-use tracing::{error, error_span};
+use tracing::error;
 use utoipa::ToSchema;
 
 /// A type alias for `Result<T, HandlerError>`.
@@ -187,7 +187,6 @@ where
 
 #[cfg(test)]
 mod test {
-	use std::default;
 
 	use super::*;
 

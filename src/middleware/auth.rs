@@ -3,7 +3,6 @@ use axum::{
 	extract::FromRequestParts,
 	http::{header, request::Parts},
 };
-use axum_extra::headers::Authorization;
 
 use crate::error::HandlerError;
 

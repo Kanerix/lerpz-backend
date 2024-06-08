@@ -2,7 +2,6 @@ use jsonwebtoken::{errors::Result as DecodeResult, DecodingKey, TokenData, Valid
 
 use super::claims::{JwtAudience, JwtIssuer, TokenClaims};
 
-pub use jsonwebtoken::Algorithm;
 
 /// Represent a validator for a JWT token.
 ///
