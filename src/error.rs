@@ -23,18 +23,18 @@ where
 	pub status_code: StatusCode,
 	/// The error header.
 	///
-	/// The headline for the error. A short and precise
-	/// explanation of the error that occurred.
+	/// Short and precise text that gives an indication
+	/// of what the error is about.
 	pub header: String,
 	/// The error message.
 	///
 	/// A more detailed description of what wen't wrong
 	/// or what to do next.
 	pub message: String,
-	/// Other details about the error.
+	/// Additional details about the error.
 	///
 	/// Does not get send to the client if it's [`None`].
-	/// The some variant should implement [`ToSchema`] so that
+	/// The [`Some`] variant should implement [`ToSchema`] so that
 	/// an OpenAPI schema can be generated for the type.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[aliases(Detail = ToSchema)]
@@ -43,17 +43,22 @@ where
 	///
 	/// There might no be an actual error, in which case this
 	/// field is [`None`]. Should never be exposed to the client
-	/// for security reasons.
+	/// for security reasons. This is why we skip Serilization.
 	///
 	/// If this field contains an error, the log_id field should
 	/// also be present, to identify the error in the logs.
 	#[serde(skip)]
 	pub inner: Option<anyhow::Error>,
-	/// The log ID of the error send to the client.
+	/// The log ID of the error.
 	///
 	/// This is automatically set when the response contains an error
-	/// that should be tracked. This is not public, so that it never
-	/// get's set manually.
+	/// that should be tracked. This is not public, so that it is never
+	/// set manually, since that might break how you identify the error.
+	///
+	/// This field is sent to the client instead of the acctual error
+	/// that occured. This is way more secure, since the acctual error might
+	/// contain information that should not be leaked and might help attackers
+	/// understand how to exploit the application.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	log_id: Option<uuid::Uuid>,
 }
@@ -108,7 +113,7 @@ where
 			message: String::from("If this issue persists, please contact an administrator."),
 			detail: None,
 			inner: Some(value.into()),
-			log_id: None, // This will be set in `into_response` if inner set.
+			log_id: None, // This will be set in `into_response()` if `inner` is [`Some`].
 		}
 	}
 }
@@ -182,9 +187,11 @@ where
 
 #[cfg(test)]
 mod test {
+	use std::default;
+
 	use super::*;
 
-	#[derive(Serialize, ToSchema)]
+	#[derive(Serialize, ToSchema, Default)]
 	struct Detail {
 		test_detail: String,
 	}
@@ -197,21 +204,17 @@ mod test {
 
 	#[test]
 	fn test_internal_server_error() {
-		let inner_error = Error::RandomError;
-		let detail = Detail {
-			test_detail: String::from("Test detail"),
-		};
-
 		let handler_error: HandlerError<Detail> = HandlerError::new(
 			StatusCode::BAD_REQUEST,
-			"This is a test",
-			"This is a test handler error.",
+			"Bad Request",
+			"Something went wrong, please contact an developer",
 		)
-		.with_error(inner_error)
-		.with_detail(detail);
+		.with_error(Error::RandomError)
+		.with_detail(Detail::default());
 
 		assert!(handler_error.inner.is_some());
 		assert!(handler_error.detail.is_some());
+
 		// `log_id` should only be set when turned into a response.
 		assert!(handler_error.log_id.is_none());
 
@@ -220,14 +223,15 @@ mod test {
 	}
 
 	#[test]
-	fn test_any_error_to_handler_error() {
+	fn test_any_error_to_handler_result() {
 		let example_handler = || -> HandlerResult<i32, HandlerError> { Ok("abc".parse::<i32>()?) };
-		assert!(example_handler().is_err());
 
-		let error = example_handler().unwrap_err();
-		assert!(error.status_code.is_server_error());
-		assert!(error.inner.is_some());
+		let handler_error = example_handler().unwrap_err();
+
+		assert!(handler_error.status_code.is_server_error());
+		assert!(handler_error.inner.is_some());
+
 		// `log_id` should only be set when turned into a response.
-		assert!(error.log_id.is_none());
+		assert!(handler_error.log_id.is_none());
 	}
 }
