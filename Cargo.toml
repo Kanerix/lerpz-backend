@@ -7,12 +7,12 @@ edition = "2021"
 # -- Web
 axum = { version = "0.7", features = ["macros", "tokio"] }
 axum-extra = { version = "0.9", features = ["cookie", "typed-header"] }
-utoipa = { version = "4.2", features = ["uuid", "chrono"] }
-utoipa-swagger-ui = { version = "6.0", features = ["axum"] }
-# -- Async
-tokio = { version = "1.35", features = ["full"] }
 tower = "0.4"
 tower-http = { version = "0.5", features = ["full"] }
+utoipa = { version = "4.2", features = ["uuid", "chrono"] }
+utoipa-swagger-ui = { version = "7.0", features = ["axum"] }
+# -- Async
+tokio = { version = "1.35", features = ["full"] }
 futures-util = "0.3"
 # -- Tracing
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -24,7 +24,8 @@ serde_json = "1.0"
 # -- Other
 anyhow = "1.0"
 thiserror = "1.0"
-sqlx = { version = "0.7.3", features = ["postgres", "runtime-tokio-native-tls", "chrono", "migrate", "macros", "uuid"] }
-rand = "0.8.5"
-jsonwebtoken = "9.2.0"
-chrono = { version = "0.4.34", features = ["serde"] }
+sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-native-tls", "chrono", "migrate", "macros", "uuid"] }
+rand = "0.8"
+jsonwebtoken = "9.2"
+chrono = { version = "0.4", features = ["serde"] }
+argon2 = "0.5"
