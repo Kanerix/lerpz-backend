@@ -1,8 +1,4 @@
-use std::{
-	ffi::OsStr,
-	str::FromStr,
-};
-
+use std::{ffi::OsStr, str::FromStr};
 
 /// A type alias for handling results from this module.
 pub type Result<T> = std::result::Result<T, Error>;
@@ -26,7 +22,7 @@ where
 	std::env::var(key).map_err(|_| Error::NotFound(key.as_ref().to_string_lossy().to_string()))
 }
 
-/// Get an environment variable and parse it into a type.
+/// Get an environment variable and tries to parse it into the generic type `T`.
 ///
 /// Returns an error if the variable is not found or if the parsing fails.
 pub fn get_env_parse<T, K>(key: K) -> Result<T>
