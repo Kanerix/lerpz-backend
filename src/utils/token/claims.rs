@@ -37,8 +37,8 @@ pub enum JwtAudience {
 	Dashboard,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[non_exhaustive]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum JwtIssuer {
 	#[serde(rename = "https://api.lerpz.com")]
 	API,

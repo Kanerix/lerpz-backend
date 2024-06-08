@@ -1,7 +1,7 @@
+pub mod builder;
 pub mod claims;
-pub mod decode;
-pub mod encode;
 pub mod keys;
+pub mod validator;
 
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 

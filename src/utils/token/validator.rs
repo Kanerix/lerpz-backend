@@ -7,16 +7,16 @@ pub use jsonwebtoken::Algorithm;
 /// Represent a validator for a JWT token.
 ///
 /// This struct is used to validate a JWT token.
-pub struct AuthTokenValidator {
+pub struct TokenValidatorBuilder {
 	token: String,
 	validation: Validation,
 }
 
-impl AuthTokenValidator {
-	/// Creates a new [`AuthTokenValidator`] with the given token.
+impl TokenValidatorBuilder {
+	/// Creates a new [`TokenValidatorBuilder`] with the given token.
 	///
-	/// The default algorithm is `EdDSA` for validation. This can be
-	/// changed with the `with_alg()` method.
+	/// The default algorithm for validation is [`Algorithm::EdDSA`].
+	/// This can be changed with the [`TokenValidatorBuilder::with_alg`] method.
 	pub fn new(token: impl Into<String>) -> Self {
 		Self {
 			token: token.into(),
@@ -31,13 +31,13 @@ impl AuthTokenValidator {
 	}
 
 	/// Adds multiple algorithms to the validation.
-	pub fn with_multiple_algs(mut self, algs: Vec<jsonwebtoken::Algorithm>) -> Self {
+	pub fn with_algs(mut self, algs: Vec<jsonwebtoken::Algorithm>) -> Self {
 		self.validation.algorithms = algs;
 		self
 	}
 
 	/// Enables validation of the `nbf` claim.
-	pub fn with_nbf_validation(mut self) -> Self {
+	pub fn with_nbf(mut self) -> Self {
 		self.validation.validate_nbf = true;
 		self
 	}

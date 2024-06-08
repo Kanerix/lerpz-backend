@@ -2,13 +2,13 @@ use jsonwebtoken::{errors::Result as EncodeResult, Algorithm, EncodingKey, Heade
 
 use super::claims::{JwtAudience, JwtIssuer, TokenClaims, TokenUser};
 
-pub struct AuthToken {
+pub struct TokenBuilder {
 	header: Header,
 	claims: TokenClaims,
 }
 
-impl AuthToken {
-	pub fn new(user: impl Into<TokenUser>) -> AuthToken {
+impl TokenBuilder {
+	pub fn new(user: impl Into<TokenUser>) -> TokenBuilder {
 		Self {
 			claims: TokenClaims::new(user.into()),
 			header: Header::default(),
