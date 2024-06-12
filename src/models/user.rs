@@ -15,5 +15,6 @@ pub struct User {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UserRole {
 	ADMIN,
+    MODERATOR,
 	USER,
 }

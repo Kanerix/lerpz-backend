@@ -1,3 +1,3 @@
 pub mod env;
-pub mod passwd;
+pub mod pwd;
 pub mod token;
