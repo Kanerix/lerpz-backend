@@ -99,16 +99,6 @@ pub async fn register(
 							"Unique violation",
 							"Email or Username already exsits",
 						)),
-						sqlx::error::ErrorKind::ForeignKeyViolation => Err(HandlerError::new(
-							StatusCode::INTERNAL_SERVER_ERROR,
-							"Foreign key violation",
-							"Something wen't wrong",
-						)),
-						sqlx::error::ErrorKind::CheckViolation => Err(HandlerError::new(
-							StatusCode::INTERNAL_SERVER_ERROR,
-							"Check violation",
-							"Something wen't wrong",
-						)),
 						_ => Err(HandlerError::from(db_err)),
 					}
 				}
