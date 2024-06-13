@@ -1,7 +1,7 @@
 pub type Result<T> = std::result::Result<T, ErrorKind>;
 
 #[derive(thiserror::Error, Debug)]
-enum ErrorKind {
+pub enum ErrorKind {
 	#[error("failed parsing scheme for password")]
 	PwdWithSchemeFailedParse,
 	#[error("failed spawning thread for validation")]
