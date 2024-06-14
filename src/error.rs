@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use tracing::error;
 use utoipa::ToSchema;
 
-/// A type alias for `Result<T, HandlerError>`.
+/// A type alias for [`Result<T, HandlerError>`].
 ///
 /// Used by handlers to return a response or an structured error.
 pub type HandlerResult<T, D = ()> = std::result::Result<T, HandlerError<D>>;

@@ -2,32 +2,32 @@ mod error;
 mod parts;
 mod scheme_01;
 
-use error::{ErrorKind, Result};
-use parts::PwdParts;
+use error::{Error, Result};
+use parts::{PwdParts, PwdPartsRaw};
 use scheme_01::Scheme01;
 
-static DEFAULT_SCHEME: &str = "01";
+static DEFAULT_SCHEME: &'static str = "01";
 
 pub trait Scheme {
-	fn hash(pwd: PwdParts) -> Result<String>;
-	fn verify(pwd: &[u8]) -> Result<bool>;
+	fn hash(&self, pwd: PwdPartsRaw) -> Result<PwdParts>;
+	fn validate(&self, pwd_parts: PwdParts, pwd: &str) -> Result<bool>;
 }
 
 pub fn get_scheme(scheme_name: &str) -> Result<impl Scheme> {
 	match scheme_name {
 		"01" => Ok(Scheme01),
-		_ => Err(ErrorKind::SchemeNotFound(scheme_name.into())),
+		_ => Err(Error::SchemeNotFound(scheme_name.into())),
 	}
 }
 
-pub async fn hash_pwd<'a>(pwd: &'a str) -> Result<String> {
-	let pwd_parts = PwdParts::new(pwd);
-	let scheme = get_scheme(DEFAULT_SCHEME)?;
-	tokio::task::spawn_blocking(move || scheme.hash(pwd_parts))
-		.await
-		.map_err(|_| ErrorKind::FailSpawnBlockForHash)?
+pub async fn hash_pwd(pwd: String) -> Result<PwdParts> {
+	hash_pwd_parts(PwdPartsRaw::new(pwd)).await
 }
 
-pub async fn verify_pwd() -> bool {
-	return true;
+pub async fn hash_pwd_parts<'a>(raw_parts: PwdPartsRaw) -> Result<PwdParts> {
+	let scheme = get_scheme(&raw_parts.scheme_name())?;
+	tokio::task::spawn_blocking(move || scheme.hash(raw_parts))
+		.await
+		.map_err(|_| Error::FailSpawnBlockForHash)
+		.and_then(|result| result)
 }

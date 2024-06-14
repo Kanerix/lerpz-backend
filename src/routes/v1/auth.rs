@@ -3,10 +3,15 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use utoipa::{IntoParams, ToSchema};
 
-use crate::error::{HandlerError, HandlerResult};
+use crate::{
+	error::{HandlerError, HandlerResult},
+	utils::pwd::hash_pwd,
+};
 
 pub fn routes() -> Router<PgPool> {
-	Router::new().route("/login", post(login))
+	Router::new()
+		.route("/login", post(login))
+		.route("/register", post(register))
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, IntoParams)]
@@ -40,10 +45,9 @@ pub enum LoginErrorKind {
     ),
 )]
 pub async fn login(
-	State(conn): State<PgPool>,
+	State(pool): State<PgPool>,
 	Json(body): Json<LoginRequest>,
 ) -> HandlerResult<Json<LoginResponse>, LoginErrorKind> {
-	"abs".parse::<i32>()?;
 	Ok(Json(LoginResponse {
 		kind: String::from("Bearer"),
 		token: String::from("token"),
@@ -72,41 +76,34 @@ pub enum RegisterErrorKind {
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "Successful register", body = String),
+        (status = 200, description = "Account created", body = String),
     ),
 )]
 pub async fn register(
 	State(pool): State<PgPool>,
 	Json(payload): Json<RegisterRequest>,
-) -> HandlerResult<String, RegisterErrorKind> {
-	let password_hash = payload.password;
+) -> HandlerResult<()> {
+	let password_hash = hash_pwd(payload.password).await?.into_hash_string();
 
-	let user = match sqlx::query!(
+	sqlx::query!(
 		"INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3)",
 		&payload.email,
 		&payload.username,
 		&password_hash
 	)
-	.execute(&pool)
+	.fetch_one(&pool)
 	.await
-	{
-		Err(err) => {
-			return match err {
-				sqlx::Error::Database(db_err) => {
-					return match db_err.kind() {
-						sqlx::error::ErrorKind::UniqueViolation => Err(HandlerError::new(
-							StatusCode::BAD_REQUEST,
-							"Unique violation",
-							"Email or Username already exsits",
-						)),
-						_ => Err(HandlerError::from(db_err)),
-					}
-				}
-				_ => Err(HandlerError::from(err)),
-			}
-		}
-		Ok(user) => user,
-	};
+	.map_err(|err| match err {
+		sqlx::Error::Database(db_err) => match db_err.kind() {
+			sqlx::error::ErrorKind::UniqueViolation => HandlerError::new(
+				StatusCode::CONFLICT,
+				"Unique violation",
+				"Email or Username already exsits",
+			),
+			_ => HandlerError::from(db_err),
+		},
+		_ => HandlerError::from(err),
+	})?;
 
-	Ok("8skv8".to_owned())
+	Ok(())
 }

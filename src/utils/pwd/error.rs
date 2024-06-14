@@ -1,7 +1,11 @@
-pub type Result<T> = std::result::Result<T, ErrorKind>;
+/// A type alias for [`Result<T, ErrorKind>`].
+///
+/// Used by this module to return the same error kind for each [`Result`].
+pub type Result<T> = std::result::Result<T, Error>;
 
+/// All the different error kinds the `pwd` module might produce.
 #[derive(thiserror::Error, Debug)]
-pub enum ErrorKind {
+pub enum Error {
 	#[error("failed parsing scheme for password")]
 	PwdWithSchemeFailedParse,
 	#[error("failed spawning thread for validation")]
@@ -10,4 +14,8 @@ pub enum ErrorKind {
 	FailSpawnBlockForHash,
 	#[error("no scheme named \"{0}\" found")]
 	SchemeNotFound(String),
+	#[error("error creating password salt")]
+	PasswordSalt,
+	#[error("error creating password hash")]
+	PasswordHash,
 }
