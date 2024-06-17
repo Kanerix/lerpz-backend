@@ -61,12 +61,6 @@ pub struct RegisterRequest {
 	password: String,
 }
 
-#[derive(thiserror::Error, Debug, Serialize, Deserialize, ToSchema)]
-pub enum RegisterErrorKind {
-	#[error("Invalid credentials")]
-	InvalidCredentials,
-}
-
 #[utoipa::path(
     post,
     path = "/api/v1/auth/register",

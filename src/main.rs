@@ -6,8 +6,8 @@ use axum::{
 	middleware::from_extractor,
 	Router,
 };
-use config::web_config;
-use middleware::auth::AuthUser;
+use lerpz_backend::middleware::auth::AuthUser;
+use lerpz_backend::{config::web_config, routes};
 use sqlx::postgres::PgPoolOptions;
 use tower::ServiceBuilder;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
@@ -16,14 +16,6 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-mod config;
-mod db;
-mod error;
-mod middleware;
-mod models;
-mod routes;
-mod utils;
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	tracing_subscriber::registry()
@@ -31,8 +23,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		.with(tracing_subscriber::fmt::layer())
 		.init();
 
-    #[cfg(debug_assertions)]
-    dotenv::dotenv().unwrap();
+	#[cfg(debug_assertions)]
+	dotenv::dotenv().unwrap();
 
 	let addr = std::net::SocketAddr::from((Ipv4Addr::UNSPECIFIED, 8080));
 	let listener = tokio::net::TcpListener::bind(addr).await?;

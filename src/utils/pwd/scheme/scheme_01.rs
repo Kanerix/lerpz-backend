@@ -5,35 +5,34 @@ use uuid::Uuid;
 
 use super::{
 	error::{Error, Result},
-	parts::{PwdParts, PwdPartsRaw},
 	Scheme,
 };
+use crate::utils::pwd::parts::{PwdParts, PwdPartsHashed};
 
 pub struct Scheme01;
 
 impl Scheme for Scheme01 {
-	fn hash(&self, pwd_parts: PwdPartsRaw) -> Result<PwdParts> {
+	fn hash(&self, pwd_parts: PwdParts) -> Result<PwdPartsHashed> {
 		let argon2 = get_argon2();
 
-		let salt =
-			SaltString::encode_b64(Uuid::new_v4().as_bytes()).map_err(|_| Error::PasswordSalt)?;
+		let salt = SaltString::encode_b64(Uuid::new_v4().as_bytes()).map_err(|_| Error::PwdSalt)?;
 
 		let pwd = argon2
 			.hash_password(pwd_parts.pwd().as_bytes(), &salt)
-			.map_err(|_| Error::PasswordSalt)?
+			.map_err(|_| Error::PwdHash)?
 			.to_string();
 
-		Ok(PwdParts::new(pwd))
+		Ok(PwdPartsHashed::new(pwd))
 	}
 
-	fn validate(&self, pwd_parts: PwdParts, pwd_ref: &str) -> Result<bool> {
+	fn validate(&self, pwd_hash: PwdPartsHashed, pwd_ref: &str) -> Result<bool> {
 		let argon2 = get_argon2();
 
-		let pwd_ref_hash = PasswordHash::new(pwd_ref).map_err(|_| Error::PasswordHash)?;
+		let hash_ref = PasswordHash::new(pwd_ref).map_err(|_| Error::PwdHash)?;
 
-		let hash_bytes = pwd_parts.hash().as_bytes();
+		let hash_bytes = pwd_hash.hash().as_bytes();
 
-		Ok(argon2.verify_password(hash_bytes, &pwd_ref_hash).is_ok())
+		Ok(argon2.verify_password(hash_bytes, &hash_ref).is_ok())
 	}
 }
 

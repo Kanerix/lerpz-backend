@@ -1,3 +1,5 @@
+use super::scheme;
+
 /// A type alias for [`Result<T, ErrorKind>`].
 ///
 /// Used by this module to return the same error kind for each [`Result`].
@@ -13,7 +15,7 @@ pub enum Error {
 	#[error("failed spawning thread for hashing")]
 	FailSpawnBlockForHash,
 	#[error("no scheme named \"{0}\" found")]
-	SchemeNotFound(String),
+	SchemeError(#[from] scheme::error::Error),
 	#[error("error creating password salt")]
 	PasswordSalt,
 	#[error("error creating password hash")]
