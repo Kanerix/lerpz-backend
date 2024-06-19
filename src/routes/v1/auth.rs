@@ -2,6 +2,7 @@ use axum::{extract::State, http::StatusCode, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use utoipa::{IntoParams, ToSchema};
+use uuid::Uuid;
 
 use crate::{
 	error::{HandlerError, HandlerResult},
@@ -77,7 +78,9 @@ pub async fn register(
 	State(pool): State<PgPool>,
 	Json(payload): Json<RegisterRequest>,
 ) -> HandlerResult<()> {
-	let password_hash = hash_pwd(payload.password).await?.into_hash_string();
+	let salt = Uuid::new_v4().to_string();
+	let password = payload.password;
+	let password_hash = hash_pwd(password, salt).await?;
 
 	sqlx::query!(
 		"INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3)",
