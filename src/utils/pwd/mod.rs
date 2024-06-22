@@ -69,6 +69,8 @@ mod tests {
 
 	#[tokio::test]
 	async fn test_password_hashing_and_validate() {
+		dotenv::dotenv().unwrap();
+
 		let hash = hash_pwd("password".to_string(), uuid::Uuid::new_v4().to_string())
 			.await
 			.unwrap();

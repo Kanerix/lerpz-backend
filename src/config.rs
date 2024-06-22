@@ -24,6 +24,7 @@ pub fn web_config() -> &'static Config {
 pub struct Config {
 	pub DATABASE_URL: String,
 	pub API_ORIGIN: HeaderValue,
+	pub PWD_SECRET: String,
 }
 
 impl Config {
@@ -35,6 +36,7 @@ impl Config {
 		Ok(Config {
 			DATABASE_URL: get_env("DATABASE_URL")?,
 			API_ORIGIN: get_env_parse("API_ORIGIN")?,
+			PWD_SECRET: get_env("PWD_SECRET")?,
 		})
 	}
 }

@@ -1,6 +1,11 @@
 use std::sync::OnceLock;
 
-use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use argon2::{
+	password_hash::SaltString, Algorithm, Argon2, Params, PasswordHash, PasswordHasher,
+	PasswordVerifier, Version,
+};
+
+use crate::config::web_config;
 
 use super::{
 	error::{Error, Result},
@@ -43,5 +48,13 @@ impl Scheme for Scheme01 {
 fn get_argon2() -> &'static Argon2<'static> {
 	static INSTANCE: OnceLock<Argon2<'static>> = OnceLock::new();
 
-	INSTANCE.get_or_init(|| Argon2::default())
+	INSTANCE.get_or_init(|| {
+		Argon2::new_with_secret(
+			&web_config().PWD_SECRET.as_bytes(),
+			Algorithm::Argon2id,
+			Version::V0x13,
+			Params::default(),
+		)
+		.unwrap()
+	})
 }

@@ -6,9 +6,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// Errors that can occur when working with environment variables.
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-	#[error("environment variable {0} was not found")]
+	#[error("environment variable \"{0}\" was not found")]
 	NotFound(String),
-	#[error("couldn't parse environment variable {0} into {1}")]
+	#[error("couldn't parse environment variable \"{0}\" into {1}")]
 	ParseError(String, String),
 }
 
@@ -25,7 +25,7 @@ where
 /// Get an environment variable and tries to parse it into the generic type `T`.
 ///
 /// Returns an error if the variable is not found or if the parsing fails.
-pub fn get_env_parse<T, K>(key: K) -> Result<T>
+pub fn get_env_parse<K, T>(key: K) -> Result<T>
 where
 	K: AsRef<OsStr> + Copy,
 	T: FromStr,
