@@ -26,11 +26,17 @@ impl Scheme for Scheme01 {
 	fn validate(&self, pwd_hash: &str, pwd_ref: &str) -> Result<bool> {
 		let argon2 = get_argon2();
 
-		let hash_ref = PasswordHash::new(pwd_ref).map_err(|_| Error::PwdHash)?;
+		let pwd_hash_parsed = PasswordHash::new(pwd_hash)
+			.inspect_err(|err| {
+				println!("{err}");
+			})
+			.map_err(|_| Error::PwdHash)?;
 
-		let hash_bytes = pwd_hash.as_bytes();
+		let pwd_ref_bytes = pwd_ref.as_bytes();
 
-		Ok(argon2.verify_password(hash_bytes, &hash_ref).is_ok())
+		Ok(argon2
+			.verify_password(pwd_ref_bytes, &pwd_hash_parsed)
+			.is_ok())
 	}
 }
 

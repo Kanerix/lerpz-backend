@@ -11,6 +11,11 @@ pub trait Scheme {
 	fn validate(&self, pwd_hash: &str, pwd_ref: &str) -> Result<bool>;
 }
 
+/// Returns a scheme given a scheme name as a string.
+///
+/// # Errors
+///
+/// If the scheme given does not exist.
 pub fn get_scheme(scheme_name: &str) -> Result<impl Scheme> {
 	match scheme_name {
 		"01" => Ok(Scheme01),

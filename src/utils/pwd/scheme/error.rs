@@ -6,10 +6,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// All the different errors the `scheme` module might produce.
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-	#[error("scheme with name \"{0}\" does not exist")]
+	#[error("no scheme named \"{0}\" exist")]
 	SchemeNotFound(String),
-	#[error("failed parsing password")]
-	PwdParsingFailed,
 	#[error("error creating password salt")]
 	PwdSalt,
 	#[error("error creating password hash")]
