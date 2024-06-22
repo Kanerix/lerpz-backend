@@ -39,8 +39,7 @@ impl HashParts {
 }
 
 lazy_static! {
-	static ref PWD_PARTS_REGEX: Regex =
-		Regex::new(r"^#(?<scheme_name>\d{2})#(?<hash>[\w\W]+)$").unwrap();
+	static ref PWD_PARTS_REGEX: Regex = Regex::new(r"^#(?<scheme_name>\w+)#(?<hash>.+)$").unwrap();
 }
 
 impl FromStr for HashParts {
