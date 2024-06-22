@@ -29,16 +29,6 @@ impl PwdParts {
 			pwd,
 		}
 	}
-
-	/// This sets the scheme used to hash the password.
-	///
-	/// This is unsafe to call becuase you might create an password with
-	/// an old and unsafe hashing scheme. You should always use the latest
-	/// scheme if possible.
-	unsafe fn with_scheme(mut self, scheme_name: String) -> Self {
-		self.scheme_name = scheme_name;
-		self
-	}
 }
 
 impl HashParts {
