@@ -55,7 +55,7 @@ pub async fn validate_pwd_parts(hash_parts: HashParts, pwd_ref: String) -> Resul
 	let scheme = get_scheme(&hash_parts.scheme_name)?;
 	tokio::task::spawn_blocking(move || {
 		scheme
-			.validate(&hash_parts.hash, &pwd_ref)
+			.validate(&hash_parts.hash, &pwd_ref, "")
 			.map_err(|err| Error::SchemeError(err))
 	})
 	.await

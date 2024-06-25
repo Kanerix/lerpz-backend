@@ -8,7 +8,7 @@ pub trait Scheme {
 	/// This function hashes a password from some [`PwdParts`].
 	fn hash(&self, pwd: &str, salt: &str) -> Result<String>;
 	/// This function validates a password against some other password.
-	fn validate(&self, pwd_hash: &str, pwd_ref: &str) -> Result<bool>;
+	fn validate(&self, pwd_hash: &str, pwd_ref: &str, pwd_ref_salt: &str) -> Result<bool>;
 }
 
 /// Returns a scheme given a scheme name as a string.

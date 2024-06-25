@@ -28,7 +28,7 @@ impl Scheme for Scheme01 {
 		Ok(pwd)
 	}
 
-	fn validate(&self, pwd_hash: &str, pwd_ref: &str) -> Result<bool> {
+	fn validate(&self, pwd_hash: &str, pwd_ref: &str, _: &str) -> Result<bool> {
 		let argon2 = get_argon2();
 
 		let pwd_hash_parsed = PasswordHash::new(pwd_hash)
