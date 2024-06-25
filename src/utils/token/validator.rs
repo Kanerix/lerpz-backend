@@ -2,7 +2,6 @@ use jsonwebtoken::{errors::Result as DecodeResult, DecodingKey, TokenData, Valid
 
 use super::claims::{JwtAudience, JwtIssuer, TokenClaims};
 
-
 /// Represent a validator for a JWT token.
 ///
 /// This struct is used to validate a JWT token.
@@ -14,7 +13,7 @@ pub struct TokenValidatorBuilder {
 impl TokenValidatorBuilder {
 	/// Creates a new [`TokenValidatorBuilder`] with the given token.
 	///
-	/// The default algorithm for validation is [`Algorithm::EdDSA`].
+	/// The default algorithm for validation is [`Algorithm::EdDSA`](jsonwebtoken::Algorithm::EdDSA).
 	/// This can be changed with the [`TokenValidatorBuilder::with_alg`] method.
 	pub fn new(token: impl Into<String>) -> Self {
 		Self {

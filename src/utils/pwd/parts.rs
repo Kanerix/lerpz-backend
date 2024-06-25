@@ -4,14 +4,18 @@ use std::str::FromStr;
 
 use super::{error::Error, LATEST_SCHEME};
 
-/// This is the parts that every password needs to be created.
+/// What parts a password needs to be hashed.
+///
+/// This is needed when turning a password into a hash.
 pub struct PwdParts {
 	pub scheme_name: String,
 	pub salt: String,
 	pub pwd: String,
 }
 
-/// This is the parts that every password needs to be created.
+/// What passwords get turned into when hashed.
+///
+/// This is needed for validating a password hash.
 #[derive(Debug)]
 pub struct HashParts {
 	pub scheme_name: String,

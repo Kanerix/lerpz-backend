@@ -20,17 +20,17 @@ where
 {
 	/// HTTP status code for the error.
 	#[serde(skip)]
-	pub status_code: StatusCode,
+	status_code: StatusCode,
 	/// The error header.
 	///
 	/// Short and precise text that gives an indication
 	/// of what the error is about.
-	pub header: String,
+	header: String,
 	/// The error message.
 	///
 	/// A more detailed description of what wen't wrong
 	/// or what to do next.
-	pub message: String,
+	message: String,
 	/// Additional details about the error.
 	///
 	/// Does not get send to the client if it's [`None`].
@@ -38,7 +38,7 @@ where
 	/// an OpenAPI schema can be generated for the type.
 	#[serde(skip_serializing_if = "Option::is_none")]
 	#[aliases(Detail = ToSchema)]
-	pub detail: Option<D>,
+	detail: Option<D>,
 	/// The actual error that occurred.
 	///
 	/// There might no be an actual error, in which case this
@@ -48,7 +48,7 @@ where
 	/// If this field contains an error, the log_id field should
 	/// also be present, to identify the error in the logs.
 	#[serde(skip)]
-	pub inner: Option<anyhow::Error>,
+	inner: Option<anyhow::Error>,
 	/// The log ID of the error.
 	///
 	/// This is automatically set when the response contains an error
@@ -124,7 +124,7 @@ where
 {
 	/// Create a new [`HandlerError`] with status code, header and message.
 	///
-	/// All optional fields are set to `None`. These can be set using functions
+	/// All optional fields are `None` by default. These can be set using functions
 	/// found on the struct.
 	pub fn new(
 		status_code: StatusCode,
@@ -142,16 +142,13 @@ where
 	}
 
 	/// A generic response for someone that tries to access an authorized resource
-	/// with proper authorization.
+	/// without proper authorization.
 	pub fn unauthorized() -> Self {
-		Self {
-			status_code: StatusCode::UNAUTHORIZED,
-			header: String::from("Unauthorized for resource"),
-			message: String::from("You do not have permission to access this resource."),
-			detail: None,
-			inner: None,
-			log_id: None,
-		}
+		Self::new(
+			StatusCode::UNAUTHORIZED,
+			String::from("Unauthorized for resource"),
+			String::from("You do not have permission to access this resource."),
+		)
 	}
 
 	/// Adds a custom detail to the [`HandlerError`].
@@ -175,7 +172,7 @@ where
 	/// Sets the `log_id` field for the [`HandlerError`].
 	///
 	/// The `log_id` field is automatically set when the `inner` field is present and the
-	/// `log_id` field is [`None`]. Changing this field might make it hard or impossible to
+	/// `log_id` is [`None`]. Changing this field might make it hard or impossible to
 	/// track the error or in other ways, break how the error is logged.
 	pub unsafe fn with_log_id<U>(&mut self, log_id: U)
 	where
