@@ -6,6 +6,7 @@ use uuid::Uuid;
 
 use crate::{
 	error::{HandlerError, HandlerResult},
+	models,
 	utils::pwd::hash_pwd,
 };
 
@@ -27,12 +28,6 @@ pub struct LoginResponse {
 	token: String,
 }
 
-#[derive(thiserror::Error, Debug, Serialize, Deserialize, ToSchema)]
-pub enum LoginErrorKind {
-	#[error("Invalid credentials")]
-	InvalidCredentials,
-}
-
 #[utoipa::path(
     post,
     path = "/api/v1/auth/login",
@@ -47,12 +42,44 @@ pub enum LoginErrorKind {
 )]
 pub async fn login(
 	State(pool): State<PgPool>,
-	Json(body): Json<LoginRequest>,
-) -> HandlerResult<Json<LoginResponse>, LoginErrorKind> {
-	Ok(Json(LoginResponse {
-		kind: String::from("Bearer"),
-		token: String::from("token"),
-	}))
+	Json(payload): Json<LoginRequest>,
+) -> HandlerResult<Json<LoginResponse>> {
+	let user = sqlx::query_as!(
+		models::user::User,
+		"SELECT
+        id,
+        email,
+        username,
+        password_hash,
+        role AS \"role: models::user::UserRole\",
+        created_at,
+        updated_at
+        FROM users WHERE email = $1",
+		&payload.username,
+	)
+	.fetch_one(&pool)
+	.await
+	.map_err(|err| match err {
+		sqlx::Error::RowNotFound => HandlerError::new(
+			StatusCode::NOT_FOUND,
+			"User not found",
+			format!(
+				"No user with the username \"{}\" was found",
+				payload.username
+			),
+		),
+		sqlx::Error::Database(db_err) => match db_err.kind() {
+			sqlx::error::ErrorKind::UniqueViolation => HandlerError::new(
+				StatusCode::CONFLICT,
+				"Unique violation",
+				"Email or username already exsits",
+			),
+			_ => HandlerError::from(db_err),
+		},
+		_ => HandlerError::from(err),
+	})?;
+
+	todo!()
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, IntoParams)]

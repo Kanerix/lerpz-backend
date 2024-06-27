@@ -5,7 +5,6 @@ use axum::Router;
 use sqlx::PgPool;
 use utoipa::OpenApi;
 
-
 pub fn routes() -> Router<PgPool> {
 	Router::new().nest("/auth", Auth::routes())
 }
