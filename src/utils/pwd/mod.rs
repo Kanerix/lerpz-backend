@@ -92,12 +92,20 @@ mod tests {
 			.await
 			.unwrap();
 
-		let pwd_wrong = validate_pwd(hash.clone(), "not_password".to_string(), None)
-			.await
-			.unwrap();
-		let pwd_correct = validate_pwd(hash.clone(), "password".to_string(), None)
-			.await
-			.unwrap();
+		let pwd_wrong = validate_pwd(
+			hash.clone(),
+			"not_password".to_string(),
+			Some("RandomSalt".to_string()),
+		)
+		.await
+		.unwrap();
+		let pwd_correct = validate_pwd(
+			hash.clone(),
+			"password".to_string(),
+			Some("RandomSalt".to_string()),
+		)
+		.await
+		.unwrap();
 
 		assert_eq!(pwd_wrong, false);
 		assert_eq!(pwd_correct, true);
