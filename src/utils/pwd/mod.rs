@@ -88,24 +88,17 @@ mod tests {
 	async fn test_password_hashing_and_validate() {
 		dotenv::dotenv().unwrap();
 
-		let hash = hash_pwd("password".to_string(), uuid::Uuid::new_v4().to_string())
+		let salt = uuid::Uuid::new_v4().to_string();
+		let hash = hash_pwd("password".to_string(), salt.clone())
 			.await
 			.unwrap();
 
-		let pwd_wrong = validate_pwd(
-			hash.clone(),
-			"not_password".to_string(),
-			Some("RandomSalt".to_string()),
-		)
-		.await
-		.unwrap();
-		let pwd_correct = validate_pwd(
-			hash.clone(),
-			"password".to_string(),
-			Some("RandomSalt".to_string()),
-		)
-		.await
-		.unwrap();
+		let pwd_wrong = validate_pwd(hash.clone(), "not_password".to_string(), Some(salt.clone()))
+			.await
+			.unwrap();
+		let pwd_correct = validate_pwd(hash.clone(), "password".to_string(), Some(salt.clone()))
+			.await
+			.unwrap();
 
 		assert_eq!(pwd_wrong, false);
 		assert_eq!(pwd_correct, true);
