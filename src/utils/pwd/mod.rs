@@ -59,7 +59,8 @@ pub async fn validate_pwd(
 ///
 /// # Safety
 ///
-/// Make sure you use [`HashParts::from_str`] to get the scheme or be certain the the scheme given is what was used.
+/// Make sure you use [`HashParts::from_str`] to get the scheme or be certain that the scheme given is
+/// the same as what was used to create the password hash.
 pub async unsafe fn validate_pwd_parts(
 	hash_parts: HashParts,
 	pwd_ref: String,
