@@ -9,7 +9,10 @@ use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
 pub fn generate_access_token(user: impl Into<TokenUser>) -> Result<String> {
 	encode(
-		&jsonwebtoken::Header::default(),
+		&jsonwebtoken::Header {
+			alg: jsonwebtoken::Algorithm::EdDSA,
+			..Default::default()
+		},
 		&TokenClaims::new(user),
 		&keys::JWT_ENCODE_KEY,
 	)

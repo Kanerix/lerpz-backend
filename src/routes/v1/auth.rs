@@ -5,6 +5,7 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::{
+	db,
 	error::{HandlerError, HandlerResult},
 	models,
 	utils::{
@@ -84,7 +85,7 @@ pub async fn login(
 
 	// TODO: Change so passwords has its own table and then make salt a field in the password table.
 	// TODO: Maybe fix clone on password_hash.
-	if !validate_pwd(payload.password, user.password_hash.clone(), None).await? {
+	if !validate_pwd(user.password_hash.clone(), payload.password, None).await? {
 		return Err(HandlerError::unauthorized());
 	}
 

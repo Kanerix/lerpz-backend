@@ -10,7 +10,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone)]
-pub struct AuthUser(pub TokenUser);
+pub struct AuthUser(pub Option<TokenUser>);
 
 #[async_trait]
 impl<S> FromRequestParts<S> for AuthUser
@@ -35,6 +35,6 @@ where
 			token::error::Error::TokenError(err) => HandlerError::from(err),
 		})?;
 
-		Ok(AuthUser(token_data.claims.user))
+		Ok(AuthUser(Some(token_data.claims.user)))
 	}
 }

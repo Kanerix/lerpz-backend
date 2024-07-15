@@ -3,13 +3,10 @@ use std::{net::Ipv4Addr, time::Duration};
 use axum::{
 	extract::MatchedPath,
 	http::{Method, Request},
-	middleware::from_extractor,
 	Router,
 };
-use lerpz_backend::middleware::auth::AuthUser;
 use lerpz_backend::{config::web_config, routes};
 use sqlx::postgres::PgPoolOptions;
-use tower::ServiceBuilder;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tracing::info_span;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
@@ -66,8 +63,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 					matched_path,
 				)
 			}),
-		)
-		.layer(ServiceBuilder::new().layer(from_extractor::<AuthUser>()));
+		);
+	// .layer(ServiceBuilder::new().layer(from_extractor::<AuthUser>()));
 
 	axum::serve(listener, app.into_make_service())
 		.with_graceful_shutdown(shutdown_signal())
