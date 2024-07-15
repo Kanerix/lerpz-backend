@@ -1,23 +1,29 @@
 use crate::models::user::{User, UserRole};
 use serde::{Deserialize, Serialize};
-use std::{
-	collections::HashSet,
-	fmt::{self, Display, Formatter},
-};
+use std::collections::HashSet;
 
+/// Represent all the claims for the token.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TokenClaims {
+	/// This is the ID of the token. This will be some random UUID.
 	pub sub: uuid::Uuid,
+	/// This is at which time the token will expire.
 	pub exp: i64,
+	/// This is at which time the token should be valid for.
 	pub nbf: i64,
+	/// This is at what time the token was issued.
 	pub iat: i64,
+	/// This is who issued the token.
 	#[serde(skip_serializing_if = "HashSet::is_empty")]
 	pub iss: HashSet<JwtIssuer>,
+	/// This is what ausience the token is for.
 	#[serde(skip_serializing_if = "HashSet::is_empty")]
 	pub aud: HashSet<JwtAudience>,
+	/// The user, that the token is for.
 	pub user: TokenUser,
 }
 
+/// The user field in the claims.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TokenUser {
 	pub id: uuid::Uuid,
@@ -26,53 +32,36 @@ pub struct TokenUser {
 	pub role: UserRole,
 }
 
+/// The audience of the token.
+///
+/// This this is who/what the token is for. Most often
+/// the domain of a website or the name of an app.
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum JwtAudience {
-	#[serde(rename = "https://lerpz.com")]
+	#[serde(rename = "lerpz.com")]
 	MainWebsite,
-	#[serde(rename = "https://account.lerpz.com")]
+	#[serde(rename = "account.lerpz.com")]
 	Account,
-	#[serde(rename = "https://dashboard.lerpz.com")]
+	#[serde(rename = "dashboard.lerpz.com")]
 	Dashboard,
 }
 
+/// The issuer of the token.
+///
+/// This is what service created the token for the user.
+/// Whis is most often the domain of the service.
 #[non_exhaustive]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum JwtIssuer {
-	#[serde(rename = "https://api.lerpz.com")]
+	#[serde(rename = "api.lerpz.com")]
 	API,
 }
 
-impl Display for JwtAudience {
-	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-		match self {
-			Self::MainWebsite => write!(f, "https://lerpz.com"),
-			Self::Account => write!(f, "https://account.lerpz.com"),
-			Self::Dashboard => write!(f, "https://dashboard.lerpz.com"),
-		}
-	}
-}
-
-impl Display for JwtIssuer {
-	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-		match self {
-			Self::API => write!(f, "https://api.lerpz.com"),
-		}
-	}
-}
-
 impl TokenClaims {
+	/// Create a new [`TokenClaims`] instance.
 	pub fn new(user: impl Into<TokenUser>) -> Self {
-		Self {
-			sub: uuid::Uuid::new_v4(),
-			exp: chrono::Utc::now().timestamp() + 60 * 15,
-			nbf: chrono::Utc::now().timestamp(),
-			iat: chrono::Utc::now().timestamp(),
-			iss: HashSet::new(),
-			aud: HashSet::new(),
-			user: user.into(),
-		}
+		Self::from(user.into())
 	}
 }
 

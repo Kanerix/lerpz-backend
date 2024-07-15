@@ -7,7 +7,10 @@ use uuid::Uuid;
 use crate::{
 	error::{HandlerError, HandlerResult},
 	models,
-	utils::pwd::hash_pwd,
+	utils::{
+		pwd::{hash_pwd, validate_pwd},
+		token::generate_access_token,
+	},
 };
 
 pub fn routes() -> Router<PgPool> {
@@ -79,7 +82,18 @@ pub async fn login(
 		_ => HandlerError::from(err),
 	})?;
 
-	todo!()
+	// TODO: Change so passwords has its own table and then make salt a field in the password table.
+	// TODO: Maybe fix clone on password_hash.
+	if !validate_pwd(payload.password, user.password_hash.clone(), None).await? {
+		return Err(HandlerError::unauthorized());
+	}
+
+	let token = generate_access_token(user)?;
+
+	Ok(Json(LoginResponse {
+		kind: "Bearer".to_string(),
+		token,
+	}))
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, IntoParams)]

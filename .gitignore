@@ -1,6 +1,12 @@
+# Rust files
 /target
 
+# Environment files
 .env
 .env.*
 !.env.docker
 !.env.example
+
+# Private and public keys
+/keys/*
+!/keys/.gitkeep

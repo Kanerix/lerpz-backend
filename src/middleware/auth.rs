@@ -3,16 +3,14 @@ use axum::{
 	extract::FromRequestParts,
 	http::{header, request::Parts},
 };
-use axum_extra::headers::Authorization;
 
-use crate::error::HandlerError;
+use crate::{
+	error::HandlerError,
+	utils::token::{self, claims::TokenUser, decode_access_token},
+};
 
 #[derive(Debug, Clone)]
-pub struct AuthUser {
-	pub email: String,
-	pub username: String,
-	pub role: String,
-}
+pub struct AuthUser(pub TokenUser);
 
 #[async_trait]
 impl<S> FromRequestParts<S> for AuthUser
@@ -21,17 +19,22 @@ where
 {
 	type Rejection = HandlerError;
 
-	async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+	async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
 		let header = parts
 			.headers
 			.get(header::AUTHORIZATION)
-			.and_then(|header| header.to_str().ok());
+			.and_then(|header| header.to_str().ok())
+			.ok_or(HandlerError::unauthorized())?;
 
-		let header_value = match header {
-			Some(header) => header,
-			None => return Err(HandlerError::unauthorized()),
-		};
+		let token = header
+			.split_whitespace()
+			.last()
+			.ok_or(HandlerError::unauthorized())?;
 
-		todo!()
+		let token_data = decode_access_token(token).map_err(|err| match err {
+			token::error::Error::TokenError(err) => HandlerError::from(err),
+		})?;
+
+		Ok(AuthUser(token_data.claims.user))
 	}
 }
