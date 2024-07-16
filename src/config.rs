@@ -1,27 +1,25 @@
-use std::sync::OnceLock;
-
 use axum::http::HeaderValue;
+use lazy_static::lazy_static;
 
 use crate::utils::env::{self, get_env, get_env_parse};
 
-/// Generates a new [`Config`] from the environment.
-///
-/// This stores the [`Config`] in a [`OnceLock`] so that
-/// it's only generated once. This allows you to call this
-/// function each time you need a variable from the [`Config`].
-pub fn web_config() -> &'static Config {
-	static ENVIRONMENT: OnceLock<Config> = OnceLock::new();
-
-	ENVIRONMENT.get_or_init(|| {
-		Config::from_env().unwrap_or_else(|err| panic!("couldn't load environment: {}", err))
-	})
+lazy_static! {
+	/// Global configuration for the application.
+	///
+	/// This is loaded from environment variables and will
+	/// panic if any of the required variables are missing.
+	pub static ref CONFIG: Config =
+		Config::from_env().unwrap_or_else(|err| panic!("couldn't load environment: {}", err));
 }
 
-/// Configuration for the web server.
+/// Configuration for the application.
 ///
-/// Stores all useful variables used to configure the web server.
+/// Stores all variables used to configure the web server.
+///
+/// TODO: Mabye make macro to generate this struct from env variables
 #[allow(non_snake_case)]
 pub struct Config {
+	pub ENV: String,
 	pub DATABASE_URL: String,
 	pub API_ORIGIN: HeaderValue,
 	pub PWD_SECRET: String,
@@ -34,6 +32,7 @@ impl Config {
 	/// are missing or if parsing into its type fails.
 	pub fn from_env() -> env::Result<Config> {
 		Ok(Config {
+			ENV: get_env("ENV")?,
 			DATABASE_URL: get_env("DATABASE_URL")?,
 			API_ORIGIN: get_env_parse("API_ORIGIN")?,
 			PWD_SECRET: get_env("PWD_SECRET")?,
