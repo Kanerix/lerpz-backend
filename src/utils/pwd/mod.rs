@@ -15,8 +15,8 @@ static LATEST_SCHEME: &'static str = "01";
 /// # Safety
 ///
 /// This uses the latest scheme, because we use the [`PwdParts::new`] method.
-pub async fn hash_pwd(pwd: String, salt: String) -> Result<String> {
-	unsafe { hash_pwd_parts(PwdParts::new(pwd, salt)).await }
+pub async fn hash_pwd(pwd: impl Into<String>, salt: impl Into<String>) -> Result<String> {
+	unsafe { hash_pwd_parts(PwdParts::new(pwd.into(), salt.into())).await }
 }
 
 /// Hashes a password using custom [`PwdParts`].

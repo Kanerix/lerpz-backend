@@ -7,8 +7,16 @@ pub struct User {
 	pub id: Uuid,
 	pub username: String,
 	pub email: String,
-	pub password_hash: String,
 	pub role: UserRole,
+	pub created_at: DateTime<Utc>,
+	pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Password {
+	pub id: Uuid,
+	pub hash: String,
+	pub salt: Option<String>,
 	pub created_at: DateTime<Utc>,
 	pub updated_at: DateTime<Utc>,
 }
