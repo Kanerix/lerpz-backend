@@ -5,7 +5,6 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-	db,
 	error::{HandlerError, HandlerResult},
 	models,
 	utils::{
@@ -130,7 +129,7 @@ pub async fn register(
 		&payload.username,
 		&password_hash
 	)
-	.fetch_one(&pool)
+	.execute(&pool)
 	.await
 	.map_err(|err| match err {
 		sqlx::Error::Database(db_err) => match db_err.kind() {
