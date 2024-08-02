@@ -1,7 +1,7 @@
 use axum::http::HeaderValue;
 use lazy_static::lazy_static;
 
-use crate::utils::env::{self, get_env, get_env_parse};
+use crate::utils::env::{self, get_env_parse};
 
 lazy_static! {
 	/// Global configuration for the application.
@@ -12,30 +12,42 @@ lazy_static! {
 		Config::from_env().unwrap_or_else(|err| panic!("couldn't load environment: {}", err));
 }
 
-/// Configuration for the application.
+/// A macro that generates a configuration struct.
 ///
-/// Stores all variables used to configure the web server.
-///
-/// TODO: Mabye make macro to generate this struct from env variables
-#[allow(non_snake_case)]
-pub struct Config {
-	pub ENV: String,
-	pub DATABASE_URL: String,
-	pub API_ORIGIN: HeaderValue,
-	pub PWD_SECRET: String,
+/// The struct will have fields for each of the variables
+/// and will have a `from_env` method to load the variables
+/// from environment variables.
+macro_rules! generate_config {
+	($($name:ident: $type:ty),+) => {
+		/// Configuration for the application.
+		///
+		/// Stores all variables used to configure the web server.
+		#[allow(non_snake_case)]
+		pub struct Config {
+            $(
+			    pub $name: $type,
+            )+
+		}
+
+		impl Config {
+			/// Generates a new [`Config`] from environment variables.
+			///
+			/// Returns an error if any of the environment variables
+			/// are missing or if parsing into its type fails.
+			pub fn from_env() -> env::Result<Config> {
+				Ok(Config {
+                    $(
+                        $name: get_env_parse(stringify!($name))?,
+                    )+
+				})
+			}
+		}
+	};
 }
 
-impl Config {
-	/// Generates a new [`Config`] from environment variables.
-	///
-	/// Returns an error if any of the environment variables
-	/// are missing or if parsing into its type fails.
-	pub fn from_env() -> env::Result<Config> {
-		Ok(Config {
-			ENV: get_env("ENV")?,
-			DATABASE_URL: get_env("DATABASE_URL")?,
-			API_ORIGIN: get_env_parse("API_ORIGIN")?,
-			PWD_SECRET: get_env("PWD_SECRET")?,
-		})
-	}
+generate_config! {
+	ENV: String,
+	DATABASE_URL: String,
+	API_ORIGIN: HeaderValue,
+	PWD_SECRET: String
 }
