@@ -169,7 +169,7 @@ pub async fn register(
 			sqlx::error::ErrorKind::UniqueViolation => HandlerError::new(
 				StatusCode::CONFLICT,
 				"Unique violation",
-				"Email or Username already exsits",
+				"Email or username already exsits",
 			),
 			_ => HandlerError::from(db_err),
 		},
@@ -183,8 +183,7 @@ pub async fn register(
 		&user.id,
 	)
 	.execute(&mut *tx)
-	.await
-	.map_err(|err| HandlerError::from(err))?;
+	.await?;
 
 	tx.commit().await?;
 
