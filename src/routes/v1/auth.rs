@@ -98,8 +98,7 @@ pub async fn login(
 		_ => HandlerError::from(err),
 	})?;
 
-	// TODO: Change so passwords has its own table and then make salt a field in the password table.
-	if !validate_pwd(user.hash, payload.password, None).await? {
+	if !validate_pwd(user.hash, payload.password, user.salt).await? {
 		return Err(HandlerError::unauthorized());
 	}
 
