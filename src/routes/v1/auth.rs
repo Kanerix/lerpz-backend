@@ -147,7 +147,7 @@ pub async fn register(
 	let password = payload.password;
 	let hash = hash_pwd(&password, &salt).await?;
 
-	// TODO: Transaction to make sure we only create a user of we also create password
+	let mut tx = pool.begin().await?;
 
 	let user = sqlx::query_as!(
 		models::user::User,
@@ -163,7 +163,7 @@ pub async fn register(
 		&payload.email,
 		&payload.username,
 	)
-	.fetch_one(&pool)
+	.fetch_one(&mut *tx)
 	.await
 	.map_err(|err| match err {
 		sqlx::Error::Database(db_err) => match db_err.kind() {
@@ -183,9 +183,11 @@ pub async fn register(
 		&salt,
 		&user.id,
 	)
-	.execute(&pool)
+	.execute(&mut *tx)
 	.await
 	.map_err(|err| HandlerError::from(err))?;
+
+	tx.commit().await?;
 
 	Ok(())
 }
