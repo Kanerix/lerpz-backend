@@ -32,30 +32,54 @@ pub struct TokenUser {
 	pub role: UserRole,
 }
 
-/// The audience of the token.
+/// Generates the `JwtAudience` enum.
 ///
-/// This this is who/what the token is for. Most often
-/// the domain of a website or the name of an app.
-#[non_exhaustive]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum JwtAudience {
-	#[serde(rename = "lerpz.com")]
-	MainWebsite,
-	#[serde(rename = "account.lerpz.com")]
-	Account,
-	#[serde(rename = "dashboard.lerpz.com")]
-	Dashboard,
+/// This enum is used to represent the audience of the token.
+macro_rules! generate_iss {
+    ($($name:ident = $val:literal),+) => {
+        /// The audience of the token.
+        ///
+        /// This this is who/what the token is for. Most often
+        /// the domain of a website or the name of an app.
+        #[non_exhaustive]
+        #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+        pub enum JwtAudience {
+            $(
+                #[serde(rename = $val)]
+                $name,
+            )+
+        }
+    }
 }
 
-/// The issuer of the token.
+/// Generates the `JwtAudience` enum.
 ///
-/// This is what service created the token for the user.
-/// Whis is most often the domain of the service.
-#[non_exhaustive]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum JwtIssuer {
-	#[serde(rename = "api.lerpz.com")]
-	API,
+/// This enum is used to represent the audience of the token.
+macro_rules! generate_aud {
+    ($($name:ident = $val:literal),+)=> {
+        /// The issuer of the token.
+        ///
+        /// This is what service created the token for the user.
+        /// Whis is most often the domain of the service.
+        #[non_exhaustive]
+        #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+        pub enum JwtIssuer {
+            $(
+                #[serde(rename = $val)]
+                $name,
+            )+
+        }
+    }
+}
+
+generate_iss! {
+	MainWebsite = "lerpz.com",
+	Account = "account.lerpz.com",
+	Dashboard = "dashboard.lerpz.com"
+}
+
+generate_aud! {
+	API = "api.lerpz.com"
 }
 
 impl TokenClaims {
