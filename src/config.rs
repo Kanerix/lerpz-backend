@@ -1,7 +1,7 @@
 use axum::http::HeaderValue;
 use lazy_static::lazy_static;
 
-use crate::utils::env::{self, get_env_parse};
+use crate::utils::env::{self, get_env, get_env_parse};
 
 lazy_static! {
 	/// Global configuration for the application.
@@ -18,7 +18,7 @@ lazy_static! {
 /// and will have a `from_env` method to load the variables
 /// from environment variables.
 macro_rules! generate_config {
-	($($name:ident: $type:ty),+) => {
+	($($name:ident: $type:ty = $func:tt),+) => {
 		/// Configuration for the application.
 		///
 		/// Stores all variables used to configure the web server.
@@ -37,7 +37,7 @@ macro_rules! generate_config {
 			pub fn from_env() -> env::Result<Config> {
 				Ok(Config {
                     $(
-                        $name: get_env_parse(stringify!($name))?,
+                        $name: $func(stringify!($name))?,
                     )+
 				})
 			}
@@ -46,8 +46,8 @@ macro_rules! generate_config {
 }
 
 generate_config! {
-	ENV: String,
-	DATABASE_URL: String,
-	API_ORIGIN: HeaderValue,
-	PWD_SECRET: String
+	ENV: String = get_env,
+	DATABASE_URL: String = get_env,
+	API_ORIGIN: HeaderValue = get_env_parse,
+	PWD_SECRET: String = get_env
 }
