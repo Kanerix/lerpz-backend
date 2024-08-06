@@ -98,8 +98,7 @@ pub async fn login(
 		_ => HandlerError::from(err),
 	})?;
 
-	// TODO: Change so passwords has its own table and then make salt a field in the password table.
-	if !validate_pwd(user.hash, payload.password, None).await? {
+	if !validate_pwd(user.hash, payload.password, user.salt).await? {
 		return Err(HandlerError::unauthorized());
 	}
 
@@ -147,7 +146,7 @@ pub async fn register(
 	let password = payload.password;
 	let hash = hash_pwd(&password, &salt).await?;
 
-	// TODO: Transaction to make sure we only create a user of we also create password
+	let mut tx = pool.begin().await?;
 
 	let user = sqlx::query_as!(
 		models::user::User,
@@ -163,14 +162,14 @@ pub async fn register(
 		&payload.email,
 		&payload.username,
 	)
-	.fetch_one(&pool)
+	.fetch_one(&mut *tx)
 	.await
 	.map_err(|err| match err {
 		sqlx::Error::Database(db_err) => match db_err.kind() {
 			sqlx::error::ErrorKind::UniqueViolation => HandlerError::new(
 				StatusCode::CONFLICT,
 				"Unique violation",
-				"Email or Username already exsits",
+				"Email or username already exsits",
 			),
 			_ => HandlerError::from(db_err),
 		},
@@ -183,9 +182,10 @@ pub async fn register(
 		&salt,
 		&user.id,
 	)
-	.execute(&pool)
-	.await
-	.map_err(|err| HandlerError::from(err))?;
+	.execute(&mut *tx)
+	.await?;
+
+	tx.commit().await?;
 
 	Ok(())
 }
