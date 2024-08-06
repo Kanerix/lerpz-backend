@@ -45,9 +45,9 @@ pub async unsafe fn hash_pwd_parts(pwd_parts: PwdParts) -> Result<String> {
 pub async fn validate_pwd(
 	pwd_hash: String,
 	pwd_ref: String,
-	pwd_ref_salt: Option<String>,
+	pwd_salt: Option<String>,
 ) -> Result<bool> {
-	unsafe { validate_pwd_parts(HashParts::from_str(&pwd_hash)?, pwd_ref, pwd_ref_salt).await }
+	unsafe { validate_pwd_parts(HashParts::from_str(&pwd_hash)?, pwd_ref, pwd_salt).await }
 }
 
 /// Validates a password using [`HashParts`] and a password reference with a optional salt.
@@ -64,7 +64,7 @@ pub async fn validate_pwd(
 pub async unsafe fn validate_pwd_parts(
 	hash_parts: HashParts,
 	pwd_ref: String,
-	pwd_ref_salt: Option<String>,
+	pwd_salt: Option<String>,
 ) -> Result<bool> {
 	let scheme = get_scheme(&hash_parts.scheme_name)?;
 	tokio::task::spawn_blocking(move || {
@@ -72,7 +72,7 @@ pub async unsafe fn validate_pwd_parts(
 			.validate(
 				&hash_parts.hash,
 				&pwd_ref,
-				pwd_ref_salt.as_ref().map(|x| x.as_str()),
+				pwd_salt.as_ref().map(|x| x.as_str()),
 			)
 			.map_err(|err| Error::SchemeError(err))
 	})

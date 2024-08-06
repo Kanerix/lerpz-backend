@@ -12,8 +12,8 @@ pub enum Error {
 	FailSpawnBlockForValidate,
 	#[error("failed spawning thread for hashing")]
 	FailSpawnBlockForHash,
-	#[error("failed parsing password")]
-	PwdParsingFailed,
+	#[error("failed parsing password: {0}")]
+	PwdParsingFailed(String),
 	#[error("scheme error: {0}")]
 	SchemeError(#[from] scheme::error::Error),
 }

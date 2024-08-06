@@ -50,16 +50,22 @@ impl FromStr for HashParts {
 	type Err = Error;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let captures = PWD_PARTS_REGEX.captures(s).ok_or(Error::PwdParsingFailed)?;
+		let captures = PWD_PARTS_REGEX.captures(s).ok_or(Error::PwdParsingFailed(
+			"password hash is not in the correct format".to_string(),
+		))?;
 
 		let scheme_name = captures
 			.name("scheme_name")
-			.ok_or(Error::PwdParsingFailed)?
+			.ok_or(Error::PwdParsingFailed(
+				"missing \"scheme_name\" part in password hash".to_string(),
+			))?
 			.as_str()
 			.to_string();
 		let hash = captures
 			.name("hash")
-			.ok_or(Error::PwdParsingFailed)?
+			.ok_or(Error::PwdParsingFailed(
+				"missing \"hash\" part in password hash".to_string(),
+			))?
 			.as_str()
 			.to_string();
 
