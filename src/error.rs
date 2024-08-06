@@ -16,7 +16,7 @@ pub type HandlerResult<T, D = ()> = std::result::Result<T, HandlerError<D>>;
 #[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct HandlerError<D = ()>
 where
-	D: Serialize + Send + Sync + ToSchema<'static>,
+	D: Serialize + Send + Sync,
 {
 	/// HTTP status code for the error.
 	#[serde(skip)]
@@ -37,7 +37,6 @@ where
 	/// The [`Some`] variant should implement [`ToSchema`] so that
 	/// an OpenAPI schema can be generated for the type.
 	#[serde(skip_serializing_if = "Option::is_none")]
-	#[aliases(Detail = ToSchema)]
 	detail: Option<D>,
 	/// The actual error that occurred.
 	///
@@ -65,7 +64,7 @@ where
 
 impl<D> IntoResponse for HandlerError<D>
 where
-	D: Serialize + Send + Sync + ToSchema<'static>,
+	D: Serialize + Send + Sync,
 {
 	/// Converts a [`HandlerError`] into a [`Response`].
 	///
@@ -100,7 +99,7 @@ where
 impl<E, D> From<E> for HandlerError<D>
 where
 	E: Into<anyhow::Error>,
-	D: Serialize + Send + Sync + ToSchema<'static>,
+	D: Serialize + Send + Sync,
 {
 	/// Turns any error into a [`HandlerError`].
 	///
@@ -120,7 +119,7 @@ where
 
 impl<D> HandlerError<D>
 where
-	D: Serialize + Send + Sync + ToSchema<'static>,
+	D: Serialize + Send + Sync,
 {
 	/// Create a new [`HandlerError`] with status code, header and message.
 	///
@@ -184,15 +183,14 @@ where
 
 #[cfg(test)]
 mod test {
-
 	use super::*;
 
-	#[derive(Serialize, ToSchema, Default)]
+	#[derive(Serialize, Default)]
 	struct Detail {
-		test_detail: String,
+		field: String,
 	}
 
-	#[derive(thiserror::Error, Debug, ToSchema)]
+	#[derive(thiserror::Error, Debug)]
 	enum Error {
 		#[error("This is a test error.")]
 		RandomError,
@@ -215,6 +213,7 @@ mod test {
 		assert!(handler_error.log_id.is_none());
 
 		let response = handler_error.into_response();
+
 		assert!(response.status().is_client_error());
 	}
 
