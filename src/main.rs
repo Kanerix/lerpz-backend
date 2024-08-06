@@ -26,9 +26,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let addr = std::net::SocketAddr::from((Ipv4Addr::UNSPECIFIED, 8080));
 	let listener = tokio::net::TcpListener::bind(addr).await?;
 
-	#[cfg(debug_assertions)]
-	dotenv::dotenv().unwrap();
-
 	let pool = PgPoolOptions::new()
 		.max_connections(5)
 		.acquire_timeout(Duration::from_secs(3))
