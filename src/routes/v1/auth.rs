@@ -48,7 +48,6 @@ pub async fn login(
 	State(pool): State<PgPool>,
 	Json(payload): Json<LoginRequest>,
 ) -> HandlerResult<Json<LoginResponse>> {
-	#[derive(Serialize, Deserialize)]
 	pub struct UserWithPassword {
 		pub id: Uuid,
 		pub username: String,
