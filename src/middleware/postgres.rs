@@ -7,10 +7,10 @@ use sqlx::{pool::PoolConnection, PgPool, Postgres};
 
 use crate::error::HandlerError;
 
-pub struct DbConn(pub PoolConnection<Postgres>);
+pub struct PgConn(pub PoolConnection<Postgres>);
 
 #[async_trait]
-impl<S> FromRequestParts<S> for DbConn
+impl<S> FromRequestParts<S> for PgConn
 where
 	PgPool: FromRef<S>,
 	S: Send + Sync,
