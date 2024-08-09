@@ -68,7 +68,7 @@ where
 {
 	/// Converts a [`HandlerError`] into a [`Response`].
 	///
-	/// This automatically logs errors to using [`tracing`]. This also
+	/// This automatically logs errors using [`tracing`]. This also
 	/// sets the log_id field so that the error can be tracked.
 	fn into_response(mut self) -> Response {
 		if let Some(error) = self.inner.as_ref() {
@@ -86,9 +86,9 @@ where
 			let log_id = log_id.unwrap();
 
 			if self.status_code.is_server_error() {
-				error!(log_id = %log_id, server_error = %error, "An server error occurred");
+				error!(log_id = %log_id, server_error = %error, "A server error occurred");
 			} else {
-				error!(log_id = %log_id, client_error = %header, message = %message, "An client error occurred");
+				error!(log_id = %log_id, client_error = %header, message = %message, "A client error occurred");
 			}
 		}
 
